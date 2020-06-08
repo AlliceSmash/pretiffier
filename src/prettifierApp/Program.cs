@@ -9,18 +9,15 @@ namespace prettifierApp
     {
         static void Main(string[] args)
         {
-            IServiceCollection services = new ServiceCollection();
+            var serviceprovider = new ServiceCollection()
+                .AddSingleton<INumberValidator, NumberValidator>()
+                .AddSingleton<INumberPrettifier, Prettifier>()
+                .AddSingleton<IPrettifierService, PrettifierService.PerttifierService>()
+                .BuildServiceProvider();
 
-            services.AddScoped<INumberValidator, NumberValidator>();
-            services.AddScoped<INumberPrettifier, Prettifier>();
-            services.AddSingleton<IPrettifierService>(
-                s => new PrettifierService.PerttifierService(s.GetService<INumberValidator>(),
-                    s.GetService<INumberPrettifier>()));
-            
-            IServiceProvider provider = services.BuildServiceProvider();
-            var prettifierService = provider.GetService<IPrettifierService>();
+            var prettifierService = serviceprovider.GetService<IPrettifierService>();
 
-            Console.WriteLine("Please enter a number to prettify (Q or q to quit): ");
+            Console.Write("Please enter a number to prettify (Q or q to quit): ");
             var input = Console.ReadLine();
             if (string.Equals(input, "q", StringComparison.CurrentCultureIgnoreCase)) return;
             bool endApp = false;
